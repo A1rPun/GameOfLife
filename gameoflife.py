@@ -71,8 +71,8 @@ def addPentomino(grid, x=0, y=0):
 
 
 termSize = getTerminalSize()
-WIDTH = min(100, termSize[0])
-HEIGHT = min(100, termSize[1])
+WIDTH = min(100, termSize[0] * 2)
+HEIGHT = min(100, termSize[1] * 4)
 FRAMES = 1 / 30
 
 if __name__ == '__main__':
