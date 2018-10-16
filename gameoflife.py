@@ -1,4 +1,5 @@
 import curses
+import sys
 import time
 from drawille import Canvas, getTerminalSize
 
@@ -33,7 +34,6 @@ def updateGrid(grid, w, h):
 
 
 def drawGrid(canvas, grid, stdscr):
-    stdscr.clear()
     canvas.clear()
     h = len(grid)
     w = len(grid[0])
@@ -46,19 +46,34 @@ def drawGrid(canvas, grid, stdscr):
 
 
 def main(stdscr):
+    stdscr.nodelay(1)
     curses.curs_set(0)
+
+    termSize = getTerminalSize()
+    argsSize = len(sys.argv)
+    WIDTH = min((int(sys.argv[1]) if argsSize > 1 else 64), termSize[0] * 2)
+    HEIGHT = min((int(sys.argv[2]) if argsSize > 2 else 64), termSize[1] * 4)
+    FRAMES = 4
     display = Canvas()
     grid = getGrid(WIDTH, HEIGHT)
 
     addPentomino(grid, int(WIDTH / 2), int(HEIGHT / 2))
-
     drawGrid(display, grid, stdscr)
-    time.sleep(FRAMES)
+    time.sleep(1. / FRAMES)
 
     while True:
         grid = updateGrid(grid, WIDTH, HEIGHT)
         drawGrid(display, grid, stdscr)
-        time.sleep(FRAMES)
+        key = stdscr.getch()
+        if key == ord('q'):
+            break
+        elif key == ord('s'):
+            addPentomino(grid, int(WIDTH / 2), int(HEIGHT / 2))
+        elif key == curses.KEY_UP:
+            FRAMES += 1 if FRAMES < 60 else 0            
+        elif key == curses.KEY_DOWN:
+            FRAMES -= 1 if FRAMES > 2 else 0
+        time.sleep(1. / FRAMES)
 
 
 # The R-pentomino shape
@@ -69,11 +84,6 @@ def addPentomino(grid, x=0, y=0):
     grid[y + 1][x + 1] = 1
     grid[y + 2][x + 1] = 1
 
-
-termSize = getTerminalSize()
-WIDTH = min(100, termSize[0] * 2)
-HEIGHT = min(100, termSize[1] * 4)
-FRAMES = 1 / 30
 
 if __name__ == '__main__':
     curses.wrapper(main)
